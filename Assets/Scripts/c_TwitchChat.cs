@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using System;
 using System.ComponentModel;
 using System.Net.Sockets;
 using System.IO;
+using System.Linq;
 using UnityEngine.UI;
+using System.Threading.Tasks;
 
 public class c_TwitchChat : MonoBehaviour
 {
@@ -16,7 +19,7 @@ public class c_TwitchChat : MonoBehaviour
     //Get the password from https://twitchapps.com/tmi
     string username = "chrischrisbot";
     string password = "oauth:7acr7m78whhu81g6uab24wraaeekof";
-    string channelName = "HoffmanTV";
+    string channelName = "chriscrossed";
 
     string textPreface = "tr";
 
@@ -93,6 +96,32 @@ public class c_TwitchChat : MonoBehaviour
                     }
                 }
             }
+        }
+    }
+
+    void SendIrcMessage( string _message )
+    {
+        try
+        {
+            writer.WriteLine(_message);
+            writer.Flush();
+        }
+        catch (Exception _ex)
+        {
+            print(_ex.Message);
+        }
+    }
+
+    public void SendPublicChatMessage(string _message)
+    {
+        try
+        {
+            SendIrcMessage(":" + username + "!" + username + "@" + username +
+            ".tmi.twitch.tv PRIVMSG #" + channelName + " :" + _message);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
     }
 }
