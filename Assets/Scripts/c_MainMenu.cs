@@ -22,9 +22,15 @@ public class c_MainMenu : MonoBehaviour
     Text uiText_TextRegisterUser;
     InputField inputField_ChatRegisterUser;
 
+    Text uiText_Version;
+    Text uiText_UpdateProgram;
+
     // Start is called before the first frame update
     void Start()
     {
+        uiText_Version = GameObject.Find("Text_Version").gameObject.GetComponent<Text>();
+        uiText_UpdateProgram = GameObject.Find("Text_UpdateProgram").gameObject.GetComponent<Text>();
+
         StartCoroutine(SetMOTD());
         StartCoroutine(CheckVersion());
 
@@ -139,9 +145,47 @@ public class c_MainMenu : MonoBehaviour
         string path = "Assets/Version/version.txt";
         StreamReader reader = new StreamReader(path);
         string output = reader.ReadLine();
-        float version = float.Parse(output);
-        print(version);
+        float versionOnFile = float.Parse(output);
+        uiText_Version.text = "Version: " + versionOnFile;
         reader.Close();
+
+        // Get version online
+        UnityWebRequest webRequest = UnityWebRequest.Get("https://raw.githubusercontent.com/ChrisCrossed/TarkovRandomizer/main/Assets/Version/version.txt");
+        var asyncOperation = webRequest.SendWebRequest();
+        while (!asyncOperation.isDone) yield return null;
+        while (!webRequest.isDone) yield return null;
+        output = webRequest.downloadHandler.text;
+        int endOfLine = output.IndexOf("\n");
+        float versionOnline = float.Parse(output.Substring(0, endOfLine));
+
+        if (versionOnline > versionOnFile)
+        {
+            uiText_UpdateProgram.text = "Application Out Of Date!\n\nVersion " + versionOnline + " Available!";
+
+            StartCoroutine(DisplayOutOfDateMessage());
+        }
+
+        // https://raw.githubusercontent.com/ChrisCrossed/TarkovRandomizer/main/Assets/Version/version.txt
+
+        yield return null;
+    }
+
+    IEnumerator DisplayOutOfDateMessage()
+    {
+        yield return new WaitForSeconds(1.0f);
+
+        Color color = uiText_UpdateProgram.color;
+
+        while(color.a < 1.0f)
+        {
+            color.a += Time.deltaTime;
+
+            if (color.a > 1.0f) color.a = 1.0f;
+
+            uiText_UpdateProgram.color = color;
+
+            yield return new WaitForEndOfFrame();
+        }
 
         yield return null;
     }
