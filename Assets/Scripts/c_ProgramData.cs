@@ -29,6 +29,8 @@ public class c_ProgramData : MonoBehaviour
 
     public string ChatPreface;
 
+    public string ChatCommand_RegisterUser;
+
     string[] ChatCommands;
 
     // Start is called before the first frame update
