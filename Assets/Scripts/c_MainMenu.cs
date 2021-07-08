@@ -5,6 +5,7 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Networking;
+using System.IO;
 
 public class c_MainMenu : MonoBehaviour
 {
@@ -25,6 +26,7 @@ public class c_MainMenu : MonoBehaviour
     void Start()
     {
         StartCoroutine(SetMOTD());
+        StartCoroutine(CheckVersion());
 
         QuitButton = GameObject.Find("QuitButton").GetComponent<Button>();
         QuitButton.onClick.AddListener(delegate { Quit(); });
@@ -127,6 +129,19 @@ public class c_MainMenu : MonoBehaviour
         string motd = webRequest.downloadHandler.text;
 
         print(motd);
+
+        yield return null;
+    }
+
+    IEnumerator CheckVersion()
+    {
+        // Get version on file
+        string path = "Assets/Version/version.txt";
+        StreamReader reader = new StreamReader(path);
+        string output = reader.ReadLine();
+        float version = float.Parse(output);
+        print(version);
+        reader.Close();
 
         yield return null;
     }
