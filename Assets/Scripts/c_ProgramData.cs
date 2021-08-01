@@ -71,10 +71,9 @@ public class c_ProgramData : MonoBehaviour
         {
             userDataList.Add(new UserData(userName_, 100));
 
-            SaveData();
+            WriteData();
         }
     }
-
 
     // Start is called before the first frame update
     void Start()
@@ -83,68 +82,54 @@ public class c_ProgramData : MonoBehaviour
 
         print("Start Called");
 
-        // UserData newData = new UserData();
+        CheckSaveFile();
 
         AddUser("ChrisCrossed");
+        /*
         AddUser("Auston");
         AddUser("Auston");
         AddUser("1337Hacker");
         AddUser("CoolGuy42");
         AddUser("ChrisCrossed");
         AddUser("TheONE");
-        // AddUser("ImCOOOL");
+        AddUser("ImCOOOL");
+        */
 
         userDataList = userDataList.OrderBy(o => o.UserName).ToList();
     }
 
-    bool FirstSaveAttempt = false;
-    string Folder;
-    string FilePath;
-    void SaveData()
-    {
-        if(FirstSaveAttempt)
-        {
-            // string folder = "%UserProfile%/TarkovRandomizer/";
-            Folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments).Replace("\\", "/");
-            Folder += "/TarkovRandomizer/";
-
-            if (!System.IO.Directory.Exists(Folder)) System.IO.Directory.CreateDirectory(Folder);
-
-            FilePath = Path.Combine(Folder, "users.csv");
-
-            FirstSaveAttempt = false;
-        }
-
-        WriteData();
-    }
+    
 
     bool DoesUserNameExist(string _userName)
     {
-        bool foundName = false;
-
         foreach(UserData user in userDataList)
         {
-            if(user.UserName == _userName)
-            {
-                foundName = true;
-                continue;
-            }
+            if(user.UserName == _userName) return true;
         }
 
-        return foundName;
+        return false;
     }
 
+    string Folder;
+    string FilePath;
     void WriteData()
     {
+        if(FilePath == null || FilePath == "") FilePath = Folder + "users.csv";
+
         StreamWriter writer = new StreamWriter(FilePath, false);
 
         using (writer)
         {
             foreach (UserData data in userDataList)
+            {
                 writer.Write(data.UserName + "," + data.Score + System.Environment.NewLine);
-        }
+                print("Wrote " + data.UserName);
 
-        Debug.Log($"CSV File written to \"{FilePath}\"");
+                Debug.Log($"CSV File written to \"{FilePath}\"");
+
+                writer.Close();
+            }
+        }
 
         #if UNITY_EDITOR
         UnityEditor.AssetDatabase.Refresh();
@@ -158,7 +143,37 @@ public class c_ProgramData : MonoBehaviour
 
     void ReadData()
     {
+        FilePath = Folder + "users.csv";
+        StreamReader reader = new StreamReader(FilePath);
+        print(reader.ReadLine());
 
+        reader.Close();
+
+        /*
+        string textOutput = reader.ReadToEnd();
+
+        print(textOutput);
+        */
+    }
+
+    void CheckSaveFile()
+    {
+        // string folder = "%UserProfile%/TarkovRandomizer/";
+        Folder = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments).Replace("\\", "/");
+        Folder += "/TarkovRandomizer/";
+
+        if (!System.IO.Directory.Exists(Folder)) System.IO.Directory.CreateDirectory(Folder);
+
+        FilePath = Folder + "users.csv";
+        if (!System.IO.File.Exists(FilePath))
+        {
+            // FilePath = Path.Combine(FilePath);
+
+            System.IO.File.Create(FilePath);
+        }
+
+        // Read data if it exists
+        ReadData();
     }
 
     // Update is called once per frame
